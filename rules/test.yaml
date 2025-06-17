@@ -1,0 +1,63 @@
+rules:
+  - id: "high_heart_rate_tachycardia_alert_icu"
+    name: "Tachycardia Alert - High Priority - ICU"
+    description: "Alerts nurse for sustained high heart rate in ICU patients."
+    priority: 150 # Higher priority for critical alerts
+    timeout: time(240, seconds) 
+    condition:
+      all:
+        - "message contains 'Extreme Tachy'"
+        - "Type of Bed == ICU"
+    actions:
+      - type: "alert"
+        parameters:
+          alarm_level: "Urgent"
+          endpoint: Vocera
+          message: "[{{Unit}}] Patient in (Room {{room}}) has {{message}}."
+          recipient_role: "primary_nurse"
+        when:
+          - name: "Auto Escalate"
+            condition:
+              all
+                - {{current_time}} - {{sent_time}} >= time(30, seconds)
+          - then:
+            - set:
+              "response == No Response"
+          - name: "Escalate to Buddy Nurse"
+            condition:
+              all
+                - any
+                  - "response == Not Logged In"
+                  - "response == Busy"
+                  - "response == Reject"
+                  - "response == No Response"
+                - "recipient_role == 'primary_nurse'"
+              - then:
+                - set:
+                  - recipient_role: "buddy_nurse"
+              - name:"Escalate to Charge Nurse"
+                - condition:
+                  - all
+                    - any
+                      - "response == Not Logged In"
+                      - "response == Busy"
+                      - "response == Reject"
+                      - "response == No Response"
+            - "recipient_role == 'buddy_nurse'"
+              - then:
+                - set
+                  - recipient_role: many("charge_nurse", "rhc", "some_rando_on_the_street")
+              - name:"No Caregivers"
+                - condition:
+                  - all
+            - all_values(changes, "recipient_role") is ['primary_nurse', 'buddy_nurse']
+            - all_values(changes, "response") is ['Not Logged In']
+                  - then:
+                    - set
+                      - recipient_role: many("charge_nurse", "rhc", "anm")
+                      - message: "{{name}} in {{room}}, no caregivers are assigned. {{description}}"
+
+      - type: "log"
+          parameters:
+            event_type: "physiological_alarm"
+            details: "Tachycardia alert triggered for patient {{room}} {{recipient_role}} {{response}}"
