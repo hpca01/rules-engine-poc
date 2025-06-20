@@ -4,7 +4,6 @@ from fastapi import FastAPI, Request
 
 app = FastAPI()
 
-
 @app.post("/new-event")
 async def read_root(request:Request):
     json_payload = await request.json()
