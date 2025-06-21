@@ -1,10 +1,11 @@
 version: "3"
 services:
     ingress:
-        ports:
-          - 80:80
-        build:
-          dockerfile: ./Dockerfile
+      build: 
+        context: ./ingress/
+        dockerfile: Dockerfile
+      ports:
+        - 80:80
     db:
       build: 
         context: ./db/
