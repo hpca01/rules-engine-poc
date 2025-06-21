@@ -9,6 +9,6 @@ COPY ./pyproject.toml .
 
 RUN uv sync
 
-EXPOSE 8000
+EXPOSE 80
 
-CMD ["uv", "run", "fastapi", "dev", "main.py", "--port", "8000"]
+CMD ["uv", "run", "fastapi", "run", "main.py", "--port", "80"]
