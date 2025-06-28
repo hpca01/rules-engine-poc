@@ -4,17 +4,26 @@ services:
       build: 
         context: ./ingress/
         dockerfile: Dockerfile
+      env_file:
+        - ./ingress/.env
       ports:
         - 80:80
+      depends_on:
+        db:
+          condition: "service_healthy"
     db:
       build: 
         context: ./db/
         dockerfile: Dockerfile
       ports:
         - 5432:5432
+      env_file:
+        - ./db/.env
       healthcheck:
-        test: pg_isready --username=admin --host=db --dbname=tpa
+        test: pg_isready --username=ingress_admin --host=db --dbname=events
         interval: 10s
         timeout: 10s
         retries: 5
         start_period: 20s
+      volumes:
+        - ./db/data:/var/lib/postgres/data

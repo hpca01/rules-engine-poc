@@ -14,3 +14,10 @@ wheels/
 *.ods
 .vscode/
 *.xlsx
+
+#env
+*.env
+
+
+#db
+data/
