@@ -21,3 +21,9 @@ wheels/
 
 #db
 data/
+
+
+#queue
+nats1/
+nats2/
+nats3/

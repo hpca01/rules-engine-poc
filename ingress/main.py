@@ -16,6 +16,9 @@ async def init_db_resources(app: FastAPI):
     engine = init_db()
     session = partial(get_session, engine)
     yield
+    #close on program exit
+    session.__exit__()
+    engine.dispose(True)
 
 app = FastAPI(lifespan=init_db_resources)
 
