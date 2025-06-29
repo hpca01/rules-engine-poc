@@ -1,5 +1,6 @@
 from typing import Annotated, Optional, Dict
 from datetime import datetime
+from pydantic.dataclasses import dataclass
 
 from sqlmodel import Field, Session, SQLModel, create_engine, select, TIMESTAMP
 from sqlalchemy.engine import Engine
@@ -14,6 +15,10 @@ class Event(SQLModel, table=True):
                                           sa_column_kwargs={'server_default': func.now()}, nullable=False)
     modified_at:Optional[datetime] = Field(default=None, sa_type=DateTime(timezone=True), sa_column_kwargs={'onupdate': func.now(), 'server_default':func.now()})
     event:Dict[str,str] = Field(sa_type=JSON, nullable=False)
+
+@dataclass
+class EventAccepted:
+    event_id:int
 
 engine = None 
 

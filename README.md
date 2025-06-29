@@ -27,14 +27,7 @@ System should be highly available. There is no need to support multi-region(yet)
 - Receive events via REST API
     - End points:
         - POST /new-event
-            - JSON payload
-            - details:
-                - Queue the message
-                - Write record to db table events, and outbox
-                - table: received, json_payload
         - GET /status/<id>
-            - details:
-                - Query table events
 
 
 

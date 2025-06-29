@@ -1,10 +1,10 @@
 from typing import Union
 
-from fastapi import FastAPI, Request, Depends
-from models import init_db, get_session
+from fastapi import FastAPI, HTTPException, Request, Depends
+from models import init_db, get_session, Event, EventAccepted
 from contextlib import asynccontextmanager
 from functools import partial
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 engine = None
 session = partial(get_session, engine)
@@ -19,18 +19,24 @@ async def init_db_resources(app: FastAPI):
 
 app = FastAPI(lifespan=init_db_resources)
 
-@app.post("/new-event")
-async def new_event(request:Request, session:Session = Depends(session)):
+@app.post("/new_event")
+async def new_event(request:Request, session:Session = Depends(session))->EventAccepted:
     #Insert payload into pgsql and queue for processing
     #return ID of insert
     json_payload = await request.json()
-    return {"Hello": "World"}
+    event = Event(event=json_payload)
+    session.add(event)
+    session.commit()
+    return EventAccepted(event_id=event.id)
 
 @app.get("/health")
 async def health(request:Request):
     return {"status": "Active"}
 
-@app.get("/status/{item_id}")
-async def status(item_id: int, q: Union[str, None] = None, session:Session = Depends(session)):
+@app.get("/status/{event_id}")
+async def status(event_id: int, q: Union[str, None] = None, session:Session = Depends(session))->Event:
     #query pgsql by id using sqlmodel
-    return {"item_id": item_id, "q": q}
+    event = session.exec(select(Event, event_id))
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
