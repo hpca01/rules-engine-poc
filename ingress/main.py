@@ -1,7 +1,7 @@
 from typing import Union
 
 from fastapi import FastAPI, HTTPException, Request, Depends
-from models import init_db, get_session, Event, EventAccepted
+from .models import init_db, get_session, Event, EventAccepted
 from contextlib import asynccontextmanager
 from functools import partial
 from sqlmodel import Session, select
