@@ -1,12 +1,13 @@
-from typing import Union
+from typing import Union, Optional
 
 from fastapi import FastAPI, HTTPException, Request, Depends
 from .models import init_db, get_session, Event, EventAccepted
 from contextlib import asynccontextmanager
 from functools import partial
 from sqlmodel import Session, select
+from sqlalchemy.engine import Engine
 
-engine = None
+engine:Engine = None
 session = partial(get_session, engine)
 
 @asynccontextmanager
@@ -30,14 +31,15 @@ async def new_event(request:Request, session:Session = Depends(session))->EventA
     event = Event(event=json_payload)
     session.add(event)
     session.commit()
+    assert event.id is not None, "Event ID is null, it is not commited"
     return EventAccepted(event_id=event.id)
 
 @app.get("/health")
 async def health(request:Request):
     return {"status": "Active"}
 
-@app.get("/status/{event_id}")
-async def status(event_id: int, q: Union[str, None] = None, session:Session = Depends(session))->Event:
+@app.get("/status/{event_id}", response_model=Event)
+async def status(event_id: int, q: Union[str, None] = None, session:Session = Depends(session)):
     #query pgsql by id using sqlmodel
     event = session.exec(select(Event, event_id))
     if not event:
