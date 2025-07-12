@@ -37,7 +37,7 @@ class Publisher:
 
 def init_pub() -> Publisher:
     url = os.environ.get("NATS_URL")
-    user = os.environ.get("NATS_URL")
+    user = os.environ.get("NATS_USER")
     password = os.environ.get("NATS_PASS")
     port = os.environ.get("NATS_PORT")
     return Publisher(url=url, user=user, password=password, port=port)

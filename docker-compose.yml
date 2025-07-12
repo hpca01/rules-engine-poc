@@ -1,4 +1,3 @@
-version: "3"
 services:
     ingress:
       build: 
@@ -35,21 +34,25 @@ services:
         - ./db/data:/var/lib/postgres/data
 
     nats1:
-        image: nats:alpine
-        ports:
-          - "4222:4222"
-          - "8222:8222"
-        volumes:
-          - ./nats1:/data
-        networks: ["nats"]
-        command:
-          - "--name=nats1"
-          - "--cluster_name=c1"
-          - "--cluster=nats://nats1:6222"
-          - "--routes=nats-route://nats1:6222,nats-route://nats2:6222,nats-route://nats3:6222"
-          - "--http_port=8222"
-          - "--js"
-          - "--sd=/data"
+      image: nats:alpine
+      ports:
+        - "4222:4222"
+        - "8222:8222"
+      volumes:
+        - ./nats1:/data
+      env_file:
+        - ./ingress/.env
+      networks: ["nats"]
+      command:
+        - "--name=nats1"
+        - "--cluster_name=c1"
+        - "--cluster=nats://nats1:6222"
+        - "--routes=nats-route://nats1:6222,nats-route://nats2:6222,nats-route://nats3:6222"
+        - "--user=${NATS_USER}"
+        - "--pass=${NATS_PASS}"
+        - "--http_port=8222"
+        - "--js"
+        - "--sd=/data"
 
     nats2:
       image: nats:alpine
@@ -59,12 +62,16 @@ services:
       volumes:
         - ./nats2:/data
       networks: ["nats"]
+      env_file:
+        - ./ingress/.env
       command:
         - "--name=nats2"
         - "--cluster_name=c1"
         - "--cluster=nats://nats2:6222"
         - "--routes=nats-route://nats1:6222,nats-route://nats2:6222,nats-route://nats3:6222"
         - "--http_port=8222"
+        - "--user=${NATS_USER}"
+        - "--pass=${NATS_PASS}"
         - "--js"
         - "--sd=/data"
 
@@ -76,12 +83,16 @@ services:
       volumes:
         - ./nats3:/data
       networks: ["nats"]
+      env_file:
+        - ./ingress/.env
       command:
         - "--name=nats3"
         - "--cluster_name=c1"
         - "--cluster=nats://nats3:6222"
         - "--routes=nats-route://nats1:6222,nats-route://nats2:6222,nats-route://nats3:6222"
         - "--http_port=8222"
+        - "--user=${NATS_USER}"
+        - "--pass=${NATS_PASS}"
         - "--js"
         - "--sd=/data"
 

@@ -1,6 +1,7 @@
 from typing import Annotated, Optional, Dict
 from datetime import datetime
 from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
 from sqlmodel import Field, Session, SQLModel, create_engine, select, TIMESTAMP
 from sqlalchemy.engine import Engine
@@ -8,6 +9,9 @@ from sqlalchemy import Column, DateTime, func
 from sqlalchemy.dialects.postgresql import JSON
 import os
 
+class EventRequest(BaseModel):
+    location:Optional[str]
+    headers:Optional[Dict[str,str]]
 
 class Event(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -19,21 +23,3 @@ class Event(SQLModel, table=True):
 @dataclass
 class EventAccepted:
     event_id:int
-
-engine = None 
-
-def init_db():
-    #TODO: Remove this as a global
-    global engine
-    user=os.environ.get("POSTGRES_USER")
-    dbname=os.environ.get("POSTGRES_DB")
-    password = os.environ.get("POSTGRES_PASSWORD")
-    print(f'user {user} dbname {dbname} password {password} db')
-    engine = create_engine(f"postgresql://{user}:{password}@db/{dbname}", echo=True)
-    SQLModel.metadata.create_all(engine)
-    return engine
-
-
-def get_session(engine: Engine):
-    with Session(engine) as session:
-        yield session
