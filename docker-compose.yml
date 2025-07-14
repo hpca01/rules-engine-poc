@@ -7,6 +7,7 @@ services:
         - ./ingress/.env
       ports:
         - 80:80
+      networks: ["nats", "backend"]
       depends_on:
         db:
           condition: "service_healthy"
@@ -24,6 +25,7 @@ services:
         - 5432:5432
       env_file:
         - ./db/.env
+      networks: ["backend"]
       healthcheck:
         test: pg_isready --username=ingress_admin --host=db --dbname=events
         interval: 10s
@@ -99,3 +101,5 @@ services:
 networks:
   nats:
     name: nats
+  backend:
+    name: backend

@@ -2,34 +2,38 @@ from typing import Union, Optional
 
 from fastapi import FastAPI, HTTPException, Request, Depends
 from .models import Event, EventAccepted, EventRequest
-from .db import init_db, get_session
-from .queue import Publisher, init_pub
+from .db import init_db, get_session, close_db
+from .queue import Publisher, get_pub, close_pub
 from contextlib import asynccontextmanager
 from functools import partial
 from sqlmodel import Session, select
 from sqlalchemy.engine import Engine
 import json
 
-queue = init_pub
-
 
 @asynccontextmanager
 async def init_resources(app: FastAPI):
     init_db()
-    queue = init_pub()
     yield
     # close resources on program exit
-    await queue.close()
+    close_db()
+    await close_pub()
 
 
 app = FastAPI(lifespan=init_resources)
+
+@app.post("/test")
+async def new_event(
+    event:EventRequest,
+) -> EventAccepted:
+    return EventAccepted(event_id=12)
 
 
 @app.post("/new_event")
 async def new_event(
     event:EventRequest,
     session: Session = Depends(get_session),
-    queue: Publisher = Depends(queue),
+    queue: Publisher = Depends(get_pub),
 ) -> EventAccepted:
     # Insert payload into pgsql and queue for processing
     # return ID of insert
