@@ -30,18 +30,6 @@ class Publisher:
         except Exception as e:
             print(f'Exception {e} raised {servers}')
         return self
-    
-    # async def connect(self):
-    #     servers = [
-    #         f"nats://{each_node}:{self.port}"
-    #         for each_node in self.url
-    #     ]
-    #     print(f'{servers=}')
-    #     try:
-    #         self.nc = await nats.connect(servers=servers, connect_timeout=10)
-    #     except Exception as e:
-    #         print(f'Exception {e} raised {servers}')
-    #     return self
 
     async def publish(self, topic: str, msg: str, headers: Optional[Dict[str, str]]):
         if self.nc is None:

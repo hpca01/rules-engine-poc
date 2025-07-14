@@ -22,14 +22,7 @@ async def init_resources(app: FastAPI):
 
 app = FastAPI(lifespan=init_resources)
 
-@app.post("/test")
-async def new_event(
-    event:EventRequest,
-) -> EventAccepted:
-    return EventAccepted(event_id=12)
-
-
-@app.post("/new_event")
+@app.post("/event")
 async def new_event(
     event:EventRequest,
     session: Session = Depends(get_session),
