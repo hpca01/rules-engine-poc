@@ -30,19 +30,23 @@ async def new_event(
 ) -> EventAccepted:
     # Insert payload into pgsql and queue for processing
     # return ID of insert
-    print(f'{event=}')
     raw_obj = event.model_dump_json()
     obj=event
     event = Event(event=raw_obj)
     session.add(event)
-    session.commit()
-    print(f'db{event=}')
+    session.flush()
     assert event.id is not None, "Event ID is null, it is not commited"
-    await queue.publish(
-        obj.location if obj.location else "new",
-        raw_obj,
-        obj.headers if obj.headers else None,
-    )
+    try:
+        await queue.publish(
+            obj.location if obj.location else "new",
+            raw_obj,
+            obj.headers if obj.headers else None,
+        )
+    except Exception as e:
+        print(f'Error {e}')
+        session.rollback()
+        raise HTTPException(status_code=404, detail="Try request again")
+    session.commit()
     return EventAccepted(event_id=event.id)
 
 

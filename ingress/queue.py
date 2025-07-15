@@ -25,10 +25,7 @@ class Publisher:
             for each_node in self.url
         ]
         print(f'{servers=}')
-        try:
-            self.nc = await nats.connect(servers=servers, connect_timeout=10)
-        except Exception as e:
-            print(f'Exception {e} raised {servers}')
+        self.nc = await nats.connect(servers=servers, connect_timeout=10)
         return self
 
     async def publish(self, topic: str, msg: str, headers: Optional[Dict[str, str]]):
