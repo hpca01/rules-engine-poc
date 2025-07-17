@@ -8,6 +8,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy import Column, DateTime, func
 from sqlalchemy.dialects.postgresql import JSON
+from contextlib import asynccontextmanager
 import os
 
 user=os.environ.get("POSTGRES_USER")
@@ -21,8 +22,6 @@ def init_db():
 
 AsyncSessionLocal = async_sessionmaker(
     engine,
-    expire_on_commit=False,
-    class_=AsyncSession,
 )
 
 async def init():
@@ -37,7 +36,11 @@ def get_session():
 
 async def get_db_session():
     session = AsyncSessionLocal()
-    yield session
+    try:
+        yield session
+    finally:
+        await session.commit()
+        await session.close()
 
 def close_db():
     engine.dispose(True)

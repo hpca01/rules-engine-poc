@@ -3,7 +3,7 @@ from typing import Union, Optional
 from fastapi import FastAPI, HTTPException, Request, Depends
 from .models import Event, EventAccepted, EventRequest
 from .db import init_db, get_session, close_db
-from .db import init, get_db_session as get_session, db_close
+from .db import init, get_db_session as get_session
 from .queue import Publisher, get_pub, close_pub
 from contextlib import asynccontextmanager
 from functools import partial
@@ -21,7 +21,6 @@ async def init_resources(app: FastAPI):
     healthy = True
     yield
     # close resources on program exit
-    await db_close
     await close_pub()
 
 
@@ -38,7 +37,7 @@ async def new_event(
     raw_obj = event.model_dump_json()
     obj=event
     event = Event(event=raw_obj)
-    await session.add(event)
+    session.add(event)
     await session.flush()
     assert event.id is not None, "Event ID is null, it is not commited"
     try:
@@ -52,9 +51,7 @@ async def new_event(
         healthy = False
         print(f'Error occurred {traceback.format_exc()}')
         await session.rollback()
-        await session.commit()
         raise HTTPException(status_code=404, detail="Try request again")
-    await session.commit()
     return EventAccepted(event_id=event.id)
 
 
