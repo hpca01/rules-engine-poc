@@ -11,6 +11,7 @@ from sqlmodel import Session, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import Engine
 import traceback
+import json
 
 healthy = False
 
@@ -34,15 +35,16 @@ async def new_event(
 ) -> EventAccepted:
     # Insert payload into pgsql and queue for processing
     # return ID of insert
-    raw_obj = event.model_dump_json()
+    raw_obj = json.dumps(event.event)
     obj=event
     event = Event(event=raw_obj)
     session.add(event)
     await session.flush()
     assert event.id is not None, "Event ID is null, it is not commited"
     try:
+        # if location is blank then we need to broadcast all clients need to subscribe to broadcast
         await queue.publish(
-            obj.location if obj.location else "new",
+            obj.location if obj.location else "broadcast",
             raw_obj,
             obj.headers if obj.headers else None,
         )

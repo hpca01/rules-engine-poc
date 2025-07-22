@@ -10,6 +10,7 @@ from sqlalchemy.dialects.postgresql import JSON
 import os
 
 class EventRequest(BaseModel):
+    event: Dict[str, str]
     location:Optional[str]
     headers:Optional[Dict[str,str]]
 
