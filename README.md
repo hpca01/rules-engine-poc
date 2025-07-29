@@ -64,3 +64,9 @@ System should be highly available. There is no need to support multi-region(yet)
 
 ![](./hld.jpg)
 
+## Checklist
+
+- [x] Ingress Service
+- [ ] Worker API
+- [ ] Scheduler Service
+- [ ] Rules Engine
