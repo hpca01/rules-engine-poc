@@ -58,3 +58,9 @@ System should be highly available. There is no need to support multi-region(yet)
             - Compatibility with language
             - Translation errors possible
             - Unit-testability of the scripting
+
+
+## High Level Design
+
+![](./hld.jpg)
+
