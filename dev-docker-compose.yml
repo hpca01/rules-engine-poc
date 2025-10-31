@@ -8,6 +8,8 @@ services:
       ports:
         - 80:80
       networks: ["nats", "backend"]
+      volumes:
+        - ./ingress:/app
       depends_on:
         db:
           condition: "service_healthy"

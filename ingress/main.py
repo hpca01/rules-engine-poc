@@ -13,19 +13,18 @@ from sqlalchemy.engine import Engine
 import traceback
 import json
 
-healthy = False
 
 @asynccontextmanager
 async def init_resources(app: FastAPI):
-    global healthy
     await init()
-    healthy = True
+    app.healthy = True
     yield
     # close resources on program exit
     await close_pub()
 
 
 app = FastAPI(lifespan=init_resources)
+
 
 @app.post("/event")
 async def new_event(
@@ -49,8 +48,7 @@ async def new_event(
             obj.headers if obj.headers else None,
         )
     except Exception as e:
-        global healthy
-        healthy = False
+        app.healthy = False
         print(f'Error occurred {traceback.format_exc()}')
         await session.rollback()
         raise HTTPException(status_code=404, detail="Try request again")
@@ -59,8 +57,7 @@ async def new_event(
 
 @app.get("/health")
 async def health(request: Request):
-    global healthy
-    if healthy:
+    if app.healthy == True:
         return {"status": "Active"}
     else:
         raise HTTPException(status_code=404, detail={'status': 'DED'})
