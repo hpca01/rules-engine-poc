@@ -2,7 +2,7 @@ services:
     ingress:
       build: 
         context: ./ingress/
-        dockerfile: Dockerfile
+        dockerfile: Dockerfile.dev
       env_file:
         - ./ingress/.env
       ports:
