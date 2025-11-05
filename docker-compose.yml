@@ -1,5 +1,6 @@
 services:
     ingress:
+      container_name: ingress
       build: 
         context: ./ingress/
         dockerfile: Dockerfile
