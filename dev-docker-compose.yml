@@ -100,7 +100,25 @@ services:
         - "--pass=${NATS_PASS}"
         - "--js"
         - "--sd=/data"
-
+    worker:
+      container_name: worker
+      build: 
+        context: ./worker/
+        dockerfile: Dockerfile
+      env_file:
+        - ./worker/.env
+      networks: ["nats", "backend"]
+      volumes:
+        - ./worker:/app
+      depends_on:
+        db:
+          condition: "service_healthy"
+        nats1:
+          condition: "service_started"
+        nats2:
+          condition: "service_started"
+        nats3:
+          condition: "service_started"
 networks:
   nats:
     name: nats

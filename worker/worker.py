@@ -9,6 +9,7 @@ class WorkerProto(Protocol):
 
     def __init__(self, *args, **kwargs):
         self.url = json.loads(os.environ.get("NATS_CLUSTER"))
+        self.subject = os.environ.get("WORKER_SUBJECT")
         self.user = os.environ.get("NATS_USER")
         self.password = os.environ.get("NATS_PASS")
         self.port = os.environ.get("NATS_PORT")
@@ -30,3 +31,5 @@ class WorkerProto(Protocol):
     async def message_response(self, callback):
         pass
 
+if __name__ == "__main__":
+    pass
